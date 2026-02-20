@@ -50,3 +50,21 @@ $$InOrdinatio = \left( \frac{IF}{1000} \right) + \alpha \cdot [10 - (Ano_{atual}
   * **Agregação de DataFrames:** O script utiliza o `pandas` para cruzar e unir (operações de *merge* e *join*) os dados estruturados do pós-processamento com as métricas calculadas no enriquecimento.
   * **Formatação de Saída:** Renomeação de colunas para termos amigáveis ao usuário final e tratamento de dados nulos (`NaN` ou `None`).
   * **Exportação:** Uso do método `to_excel` para gerar o arquivo final, garantindo a codificação correta (`utf-8`) para que não haja problemas com acentuação na leitura da planilha.
+## 🔬 Treinamento e Validação do Modelo (SciBERT)
+
+O desenvolvimento do modelo de Reconhecimento de Entidades Nomeadas (NER) ocorreu em uma esteira paralela ao pipeline principal de processamento. Antes de o orquestrador utilizar o modelo em produção na **Etapa 3 (Inferência)**, o SciBERT passou por um rigoroso processo de *fine-tuning* e validação metodológica.
+
+### 📈 Avaliação de Desempenho
+* **Objetivo:** Validação quantitativa e qualitativa da eficácia do modelo SciBERT após o treinamento em dados rotulados.
+* **Justificativa Metodológica:** A escolha destas técnicas afasta-se da acurácia global tradicional (que costuma ser inflada em tarefas de NER devido ao excesso de palavras fora das entidades). O uso do *seqeval* garante rigor ao avaliar a entidade como um todo (esquema BIO). A Matriz de Confusão é essencial para diagnosticar se o modelo está confundindo conceitos científicos próximos (ex: classificando uma Metodologia como Resultado). Por fim, o UMAP atua como prova de aprendizado profundo: ele demonstra visualmente que a IA não está apenas memorizando palavras, mas sim compreendendo a distância semântica entre os termos no espaço vetorial.
+* **Lógica de Programação e Pontos-Chave:**
+  * **Métricas de Rótulos de Sequência (Seqeval):** Integração com o framework `seqeval` para extrair valores precisos de Precisão (Precision), Revocação (Recall) e F1-Score (Micro e Macro) no conjunto de teste. O cálculo respeita rigorosamente as fronteiras das entidades extraídas. A métrica harmônica F1, central para atestar o equilíbrio do modelo, é processada pela relação:
+
+$$F_1 = 2 \cdot \frac{Precision \cdot Recall}{Precision + Recall}$$
+
+  * **Análise de Erros (Matriz de Confusão):** Construção de matrizes de contingência utilizando `scikit-learn` e bibliotecas de plotagem (`matplotlib`/`seaborn`). 
+  
+  A matriz permite a inspeção direta da taxa de acertos na diagonal principal e expõe detalhadamente os falsos positivos e falsos negativos entre as diferentes categorias semânticas mapeadas na monografia.
+  * **Projeção do Espaço Vetorial Latente (UMAP):** Aplicação do algoritmo não linear UMAP (*Uniform Manifold Approximation and Projection*) para redução de dimensionalidade. O script extrai os *embeddings* densos gerados pelas últimas camadas ocultas do SciBERT (vetores de 768 dimensões) e os comprime matematicamente para visualização gráfica em 2D.
+  
+  * **Interpretação Semântica Qualitativa:** O agrupamento (*clustering*) resultante do UMAP gera evidências visuais indispensáveis para a publicação. A separação clara dos *clusters* de dados atesta empiricamente que o modelo aprendeu a distinguir as classes de entidades no espaço semântico antes de ser integrado ao orquestrador principal.
